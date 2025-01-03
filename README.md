@@ -1,4 +1,4 @@
-# Projektname
+# RAGLab
 Konzeption und prototypische Umsetzung eines RAG-Systems zur Durchführung wissenschaftlicher Literaturanalysen
 
 ## Beschreibung
