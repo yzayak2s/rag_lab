@@ -1,55 +1,98 @@
 # See http://help.github.com/ignore-files/ for more about ignoring files.
 
-# IDEs and editors
-/.idea
-.project
-.classpath
-.c9/
-*.launch
-.settings/
+# Byte-compiled files
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+*.log
+
+# Virtual environment and dependency management
+venv/
+env/
+*.egg-info/
+pip-wheel-metadata/
+poetry.lock
+Pipfile
+Pipfile.lock
+requirements.txt
+
+# Machine learning model files and training artifacts
+*.h5
+*.ckpt
+*.pt
+*.pth
+*.onnx
+*.tflite
+*.weights
+*.joblib
+*.pkl
+*.pb
+logs/
+checkpoints/
+models/
+saved_models/
+
+# Vector database files
+db.sqlite3
+*.index
+*.faiss
+*.vectordb
+*.hnsw
+
+# Dataset and preprocessing outputs
+dataset/
+data/
+*.csv
+*.tsv
+*.parquet
+*.jsonl
+*.pickle
+*.npy
+*.npz
+
+# IDE and editor files
+.idea/
+.vscode/
 *.sublime-workspace
 
-# IDE - VSCode
-.vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
-.history/*
+# Jupyter notebook metadata
+.ipynb_checkpoints/
+*.nbconvert/
 
-# compiled output
-/frontend/dist
-/frontend/tmp
-/frontend/out-tsc
-# Only exists if Bazel was run
-/frontend/bazel-out
+# System and OS-specific files
+.DS_Store
+Thumbs.db
 
-# dependencies
-/frontend/node_modules
-/backend/node_modules
+# Docker and container-related files
+*.env
+.dockerignore
 
-# profiling files
-/frontend/chrome-profiler-events*.json
-/frontend/speed-measure-plugin*.json
+# Temporary files/folders
+*.swp
+*.tmp
+*.temp
+*.bak
+*.old
+*.orig
+*.rej
+tmp/
+logs/
 
-# misc
-/frontend/.sass-cache
-/frontend/connect.lock
-/frontend/coverage
-/frontend/libpeerconnection.log
-/frontend/npm-debug.log
-/frontend/yarn-error.log
-/frontend/testem.log
-/frontend/typings
+# Build and distribution
+build/
+dist/
+*.egg
+*.egg-info/
+*.whl
+site/
 
-# System Files
-/frontend/.DS_Store
-/frontend/Thumbs.db
-
-/frontend/.angular/
-
-/backend/coverage
-/backend/results
-backend/.nyc_output
-.vscode/settings.json
-.vscode/launch.json
+# Testing files
+pytest_cache/
+htmlcov/
+.coverage
+.tox/
+.nox/
+.cache/
+*.snaps
+.mypy_cache/
