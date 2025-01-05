@@ -1,3 +1,5 @@
+# reference: https://docs.haystack.deepset.ai/docs/ollamagenerator#on-its-own
+
 from haystack_integrations.components.generators.ollama import OllamaGenerator
 
 generator = OllamaGenerator(model="mistral",
