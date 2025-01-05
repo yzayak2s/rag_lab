@@ -1,3 +1,5 @@
+# reference: https://docs.haystack.deepset.ai/docs/ollamagenerator#in-a-pipeline
+
 from haystack_integrations.components.generators.ollama import OllamaGenerator
 
 from haystack import Pipeline, Document
@@ -43,7 +45,14 @@ result = pipe.run({"prompt_builder": {"query": query},
 
 print(result)
 
-# {'llm': {'replies': ['Based on the provided context, it seems that you enjoy
-# soccer and summer. Unfortunately, there is no direct information given about
-# what else you enjoy...'],
-# 'meta': [{'model': 'zephyr', ...]}}
+# {
+#     'llm': {
+#         'replies': [
+#             'Based on the provided context, it seems that you enjoy
+#              soccer and summer. Unfortunately, there is no direct information given about
+#              what else you enjoy...'
+#         ],
+#     'meta': [{
+#         'model': 'mistral',
+#         ...]}
+# }
