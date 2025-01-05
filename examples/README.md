@@ -18,4 +18,9 @@ Reference: [OllamaGenerator on its own](https://docs.haystack.deepset.ai/docs/ol
 
 1. Siehe Schritt 1 in 'Beispiel app_1'
 2. Navigiere im Terminal in den Ordner app_2
-3. Siehe Schritt 2 in 'Beispiel app_2'
+3. Siehe Schritt 2 in 'Beispiel app_1'
+
+## Beispiel app_3
+1. Siehe Schritt 1 in 'Beispiel app_1'
+2. Navigiere im Terminal in den Ordner app_3
+3. Siehe Schritt 2 in 'Beispiel app_1'
