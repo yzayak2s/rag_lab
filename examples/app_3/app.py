@@ -1,3 +1,7 @@
+# references:
+#   https://docs.haystack.deepset.ai/docs/ollamagenerator
+#   https://mer.vin/2024/01/haystack-ai-to-create-rag-pipeline/
+
 # Importing required libraries
 from datasets import load_dataset
 from haystack import Document
