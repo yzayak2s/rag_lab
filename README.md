@@ -2,7 +2,7 @@
 Konzeption und prototypische Umsetzung eines RAG-Systems zur Durchführung wissenschaftlicher Literaturanalysen
 
 ## Beschreibung
-In diesem Projekt geht es darum ein RAG-System zu entwickeln.
+In diesem Projekt geht es darum, ein RAG-System zu entwickeln.
 Dabei soll das System die Durchführung wissenschaftlicher Literaturanalysen erheblich erleichtern.
 
 ## Inhaltsverzeichnis
