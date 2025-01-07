@@ -1,3 +1,7 @@
+# references:
+#   https://docs.haystack.deepset.ai/docs/ollamagenerator
+#   https://mer.vin/2024/01/summarise-legal-documents-mixtral-jina-ai/
+
 # Folgende Code-Zeile ist veraltet:
 #   from chroma_haystack.document_stores import ChromaDocumentStore
 from haystack_integrations.document_stores.chroma import ChromaDocumentStore
@@ -10,6 +14,7 @@ from haystack.components.preprocessors import DocumentSplitter
 
 # RAG pipeline
 from haystack.components.generators import HuggingFaceAPIGenerator
+from haystack_integrations.components.generators.ollama import OllamaGenerator
 from haystack.components.builders.prompt_builder import PromptBuilder
 
 # Veraltete Code-Zeile:
@@ -94,15 +99,15 @@ text_embedder = JinaTextEmbedder(
 #     # api_params={"model": "mistralai/Mixtral-8x7B-Instruct-v0.1"},
 #     token=hf_token_secret,
 # )
-# from haystack_integrations.components.generators.ollama import OllamaGenerator
-# generator = OllamaGenerator(
-#     model="mistral",
-#     url="http://127.0.0.1:11434",
-#     generation_kwargs={
-#         "num_predict": 100,
-#         "temperature": 0.9,
-#     }
-# )
+
+generator = OllamaGenerator(
+    model="mistral",
+    url="http://127.0.0.1:11434",
+    generation_kwargs={
+        "num_predict": 100,
+        "temperature": 0.9,
+    }
+)
 
 
 # warm_up method doesn't exist in HuggingFaceAPIGenerator class
