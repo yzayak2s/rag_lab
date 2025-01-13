@@ -1,5 +1,12 @@
 # Beispiele
 
+[//]: # (TODO: need to explain which tools are used (e.g. ollama, lm studio etc.)
+Voraussetzung für die Ausführung der Beispiele ist ein Framework oder Tool, dass LLMs lokal ausführen kann.
+
+Beispielsweise können folgende Frameworks/Tools genutzt werden:
+- [Ollama](https://ollama.com/)
+- [LM Studio](https://lmstudio.ai/)
+
 ## Beispiel app_1
 
 1. Stelle sicher, dass Python und folgende Python-Bibliotheken installiert sind:
