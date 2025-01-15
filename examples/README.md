@@ -48,3 +48,14 @@ References:
 - [Haystack – OllamaGenerator](https://docs.haystack.deepset.ai/docs/ollamagenerator)
 - [Mervin Praison – Summarise Legal Documents using Mixtral + Jina AI](https://mer.vin/2024/01/summarise-legal-documents-mixtral-jina-ai/)
   - [YouTube-Video](https://www.youtube.com/watch?v=vZtTlcWDddY)
+
+## Beispiel HealthCare App
+1. Siehe Schritt 1 in 'Beispiel app_1'
+2. Navigiere im Terminal in den Ordner health_care
+3. Siehe Schritt 2 in Beispiel app_1
+
+References:
+- [Haystack – OllamaGenerator](https://docs.haystack.deepset.ai/docs/ollamagenerator)
+- [Mervin Praison – Healthcare Chatbot with Mixtral 8x7b](https://mer.vin/2024/01/healthcare-chatbot-with-mixtral-8x7b/)
+  - [Tilde Thurium – Original Ressource](https://haystack.deepset.ai/blog/mixtral-8x7b-healthcare-chatbot/)
+  - [YouTube-Video](https://www.youtube.com/watch?v=HORuCK1y3ew)
