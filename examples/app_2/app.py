@@ -7,6 +7,8 @@ from haystack.components.retrievers.in_memory import InMemoryBM25Retriever
 from haystack.components.builders.prompt_builder import PromptBuilder
 from haystack.document_stores.in_memory import InMemoryDocumentStore
 
+import json
+
 template = """
 Given the following information, answer the question.
 
@@ -24,7 +26,7 @@ docstore.write_documents([Document(content="I really like summer"),
                           Document(content="I don't like reading sci-fi books"),
                           Document(content="I don't like crowded places"),])
 
-generator = OllamaGenerator(model="mistral",
+generator = OllamaGenerator(model="llama3.2",
                             url = "http://localhost:11434",
                             generation_kwargs={
                                 "num_predict": 100,
@@ -43,7 +45,7 @@ query = "Do i like summer?"
 result = pipe.run({"prompt_builder": {"query": query},
                    "retriever": {"query": query}})
 
-print(result)
+print(json.dumps(result, indent=4))
 
 # {
 #     'llm': {

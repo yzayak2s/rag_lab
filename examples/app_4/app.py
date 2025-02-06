@@ -90,7 +90,7 @@ prompt_builder = PromptBuilder(template=prompt)
 
 # Initialize Ollama generator
 generator = OllamaGenerator(
-    model="mistral",
+    model="llama3.2",
     url="http://127.0.0.1:11434",
     generation_kwargs={
         "num_predict": 100,
