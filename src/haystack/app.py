@@ -1,5 +1,9 @@
 # Importing required libraries
 from flask import Flask
+from dotenv import load_dotenv
+
+# Load environment variables from .env and .flaskenv files
+load_dotenv()
 
 app = Flask(__name__)
 
