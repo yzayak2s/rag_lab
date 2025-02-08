@@ -2,21 +2,14 @@
 from flask import Flask, request, jsonify
 from dotenv import load_dotenv
 from haystack_integrations.components.generators.ollama import OllamaGenerator
+from generator import get_ollama_generator
 
 # Load environment variables from .env and .flaskenv files
 load_dotenv()
 
 app = Flask(__name__)
 
-# Initialize LLM – TODO: Will be outsourced in a separate python-file
-llm = OllamaGenerator(
-    model="llama3.2",
-    url="http://127.0.0.1:11434",
-    generation_kwargs={
-        # "num_predict": 100, # maximum number of tokens to predict when generation text
-        "temperature": 0.0, # creativity – TODO: Will be dynamically adjustable
-    }
-)
+ollama_generator = get_ollama_generator()
 
 @app.route('/')
 def welcome():
