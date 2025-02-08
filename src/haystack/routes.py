@@ -1,9 +1,15 @@
+from dotenv import dotenv_values, find_dotenv
 from flask import Blueprint, request, jsonify
+from haystack.components.preprocessors import DocumentCleaner, DocumentSplitter
+from haystack_integrations.components.embedders.ollama import OllamaDocumentEmbedder
 
-from services.pdf_service import convert_pdf_to_document
+from services.pdf_service import convert_pdf_to_document, store_vectorized_documents
 
 # Define the blueprint
 api = Blueprint("api", __name__)
+
+ollama_model = dotenv_values(find_dotenv(".flaskenv")).get('OLLAMA_MODEL')
+ollama_url = dotenv_values(find_dotenv(".flaskenv")).get('OLLAMA_URL')
 
 @api.route('/storePDF', methods=['POST'])
 def store_pdf():
@@ -11,6 +17,12 @@ def store_pdf():
     if not file:
         return jsonify({"error": "No file information provided"}), 400
 
-    convert_pdf_to_document(file["file_path"], file["authors"])
+    documents = convert_pdf_to_document(file["file_path"], file["authors"])
+    document_cleaner = DocumentCleaner(remove_repeated_substrings=True)
+    cleaned_documents = document_cleaner.run(documents=documents)
+    splitter = DocumentSplitter(split_by="word", split_length=400)
+    split_documents = splitter.run(documents=cleaned_documents['documents'])
+    document_embedder = OllamaDocumentEmbedder(model=ollama_model, url=ollama_url)
+    vectorized_documents = document_embedder.run(documents=split_documents['documents'])
 
-    return {}
+    return store_vectorized_documents(vectorized_documents['documents'])
