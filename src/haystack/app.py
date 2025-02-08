@@ -1,5 +1,6 @@
 # Importing required libraries
 from flask import Flask, request, jsonify
+from routes import api
 from dotenv import load_dotenv
 from haystack_integrations.components.generators.ollama import OllamaGenerator
 from generator import get_ollama_generator
@@ -8,6 +9,7 @@ from generator import get_ollama_generator
 load_dotenv()
 
 app = Flask(__name__)
+app.register_blueprint(api, url_prefix='/api')
 
 ollama_generator = get_ollama_generator()
 
