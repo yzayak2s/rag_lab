@@ -1,10 +1,15 @@
+import logging
+
 from dotenv import dotenv_values, find_dotenv
+from haystack.document_stores.types import DuplicatePolicy
 from haystack_integrations.components.embedders.ollama import OllamaTextEmbedder
 from haystack_integrations.components.retrievers.qdrant import QdrantEmbeddingRetriever
 
 ollama_model = dotenv_values(find_dotenv(".flaskenv")).get('OLLAMA_MODEL')
 ollama_url = dotenv_values(find_dotenv(".flaskenv")).get('OLLAMA_URL')
 
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.ERROR)
 
 def get_documents(vdb, to_be_converted_text):
     """
@@ -18,3 +23,14 @@ def get_documents(vdb, to_be_converted_text):
     retrieved_documents = embedding_retriever.run(query_embedding=embedded_text['embedding'])
 
     return retrieved_documents
+
+def create_vectorized_documents(vdb, vectorized_documents):
+    """
+    This function stores vectorized documents in Qdrant document store.
+    :return:
+    """
+
+    try:
+        return {"count": vdb.write_documents(documents=vectorized_documents, policy=DuplicatePolicy.SKIP)}
+    except Exception as e:
+        logger.error(f"Failed to write documents to Qdrant document store: {e}")

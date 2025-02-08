@@ -3,8 +3,8 @@ from flask import Blueprint, request, jsonify
 from haystack.components.preprocessors import DocumentCleaner, DocumentSplitter
 from haystack_integrations.components.embedders.ollama import OllamaDocumentEmbedder
 
-from services.pdf_service import convert_pdf_to_document, create_vectorized_documents
-from services.document_service import get_documents
+from services.pdf_service import convert_pdf_to_document
+from services.document_service import get_documents, create_vectorized_documents
 from qdrant_store import get_qdrant_document_store
 
 # Define the blueprint

@@ -21,14 +21,3 @@ def convert_pdf_to_document(file_path: str, authors: str):
     results = converter.run(sources=[file_path], meta=[{"authors": authors}])
 
     return results["documents"]
-
-def create_vectorized_documents(vdb, vectorized_documents):
-    """
-    This function stores vectorized documents in Qdrant document store.
-    :return:
-    """
-
-    try:
-        return {"count": vdb.write_documents(documents=vectorized_documents, policy=DuplicatePolicy.SKIP)}
-    except Exception as e:
-        logger.error(f"Failed to write documents to Qdrant document store: {e}")
