@@ -1,9 +1,12 @@
 import logging
 
 from dotenv import dotenv_values, find_dotenv
+from haystack.components.preprocessors import DocumentCleaner, DocumentSplitter
 from haystack.document_stores.types import DuplicatePolicy
-from haystack_integrations.components.embedders.ollama import OllamaTextEmbedder
+from haystack_integrations.components.embedders.ollama import OllamaTextEmbedder, OllamaDocumentEmbedder
 from haystack_integrations.components.retrievers.qdrant import QdrantEmbeddingRetriever
+
+from services.pdf_service import convert_pdf_to_document
 
 ollama_model = dotenv_values(find_dotenv(".flaskenv")).get('OLLAMA_MODEL')
 ollama_url = dotenv_values(find_dotenv(".flaskenv")).get('OLLAMA_URL')
@@ -24,13 +27,20 @@ def get_documents(vdb, to_be_converted_text):
 
     return retrieved_documents
 
-def create_vectorized_documents(vdb, vectorized_documents):
+def create_vectorized_documents(vdb, file):
     """
     This function stores vectorized documents in Qdrant document store.
     :return:
     """
+    documents = convert_pdf_to_document(file["file_path"], file["authors"])
+    document_cleaner = DocumentCleaner(remove_repeated_substrings=True)
+    cleaned_documents = document_cleaner.run(documents=documents)
+    document_splitter = DocumentSplitter(split_by="word", split_length=400)
+    split_documents = document_splitter.run(documents=cleaned_documents['documents'])
+    document_embedder = OllamaDocumentEmbedder(model=ollama_model, url=ollama_url)
+    vectorized_documents = document_embedder.run(documents=split_documents['documents'])
 
     try:
-        return {"count": vdb.write_documents(documents=vectorized_documents, policy=DuplicatePolicy.SKIP)}
+        return {"count": vdb.write_documents(documents=vectorized_documents['documents'], policy=DuplicatePolicy.SKIP)}
     except Exception as e:
         logger.error(f"Failed to write documents to Qdrant document store: {e}")
