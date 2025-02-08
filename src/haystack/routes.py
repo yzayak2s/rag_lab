@@ -4,6 +4,7 @@ from haystack.components.preprocessors import DocumentCleaner, DocumentSplitter
 from haystack_integrations.components.embedders.ollama import OllamaDocumentEmbedder
 
 from services.pdf_service import convert_pdf_to_document, create_vectorized_documents
+from services.document_service import get_documents
 from qdrant_store import get_qdrant_document_store
 
 # Define the blueprint
@@ -28,3 +29,15 @@ def store_pdf():
     vectorized_documents = document_embedder.run(documents=split_documents['documents'])
 
     return create_vectorized_documents(qdrant_document_store, vectorized_documents['documents'])
+
+@api.route('/getVecDocs', methods=['POST'])
+def get_vectorized_documents():
+    to_be_converted_text = request.json.get("to_be_converted_text")
+    if not to_be_converted_text:
+        return jsonify({"error": "No text information provided"}), 400
+    retrieved_documents = get_documents(
+        vdb=qdrant_document_store,
+        to_be_converted_text=to_be_converted_text
+    )
+
+    return {"vec_docs": retrieved_documents}
