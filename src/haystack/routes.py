@@ -2,9 +2,13 @@ from flask import Blueprint, request, jsonify
 
 from services.document_service import get_documents, create_vectorized_documents
 from qdrant_store import get_qdrant_document_store
+from generator import get_ollama_generator
 
 # Define the blueprint
 api = Blueprint("api", __name__)
+
+# Initialize ollama generator and vector database
+ollama_generator = get_ollama_generator()
 qdrant_document_store = get_qdrant_document_store()
 
 @api.route('/storePDF', methods=['POST'])
