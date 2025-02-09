@@ -1,5 +1,5 @@
 # Importing required libraries
-from flask import Flask, request, jsonify
+from flask import Flask
 from routes import api
 from dotenv import load_dotenv
 
@@ -15,12 +15,3 @@ def welcome():
 
 if __name__ == '__main__':
     app.run(debug=True)
-
-@app.route('/generate', methods=['POST'])
-def generate_text():
-    input_text = request.json.get("text", "")
-    if not input_text:
-        return jsonify({"error": "No input text provided"}), 400
-
-    result = llm.run(input_text)
-    return jsonify({"generated_text": result})
