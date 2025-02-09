@@ -39,6 +39,8 @@ db.sqlite3
 *.faiss
 *.vectordb
 *.hnsw
+qdrant/
+identifier.sqlite
 
 # Dataset and preprocessing outputs
 dataset/
