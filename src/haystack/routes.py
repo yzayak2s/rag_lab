@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify
 
 from services.document_service import get_documents, create_vectorized_documents
+from services.chat_service import chat_documents
 from qdrant_store import get_qdrant_document_store
 from generator import get_ollama_generator
 
@@ -30,3 +31,16 @@ def get_vectorized_documents():
     )
 
     return {"vec_docs": retrieved_documents}
+
+@api.route('/chat', methods=['POST'])
+def chat_with_documents():
+    question = request.json.get("question")
+    if not question:
+        return jsonify({"error": "No question provided"}), 400
+
+    prompted_documents = chat_documents(
+        vdb=qdrant_document_store,
+        question=question,
+        generator=ollama_generator
+    )
+    return jsonify({"prompted_documents": prompted_documents})
