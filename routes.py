@@ -29,7 +29,7 @@ def store_pdfs():
     if not files:
         return jsonify({"error": "No files information provided"}), 400
     count_array = [create_vectorized_documents(qdrant_document_store, file_object['file'])['count'] for file_object in files]
-    return reduce(add, count_array)
+    return {"total_count": reduce(add, count_array)}
 
 @api.route('/getVecDocs', methods=['POST'])
 def get_vectorized_documents():
