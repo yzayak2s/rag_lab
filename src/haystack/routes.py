@@ -1,3 +1,6 @@
+from functools import reduce
+from operator import add
+
 from flask import Blueprint, request, jsonify
 
 from services.document_service import get_documents, create_vectorized_documents
@@ -19,6 +22,14 @@ def store_pdf():
         return jsonify({"error": "No file information provided"}), 400
 
     return create_vectorized_documents(qdrant_document_store, file)
+
+@api.route('/pdfs', methods=['POST'])
+def store_pdfs():
+    files = request.json.get("files")
+    if not files:
+        return jsonify({"error": "No files information provided"}), 400
+    count_array = [create_vectorized_documents(qdrant_document_store, file_object['file'])['count'] for file_object in files]
+    return reduce(add, count_array)
 
 @api.route('/getVecDocs', methods=['POST'])
 def get_vectorized_documents():
