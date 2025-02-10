@@ -7,6 +7,7 @@ from services.document_service import get_documents, create_vectorized_documents
 from services.chat_service import chat_documents
 from qdrant_store import get_qdrant_document_store
 from generator import get_ollama_generator
+from services.record_service import create_records
 
 # Define the blueprint
 api = Blueprint("api", __name__)
@@ -22,6 +23,14 @@ def store_pdf():
         return jsonify({"error": "No file information provided"}), 400
 
     return create_vectorized_documents(qdrant_document_store, file)
+
+@api.route('/record', methods=['POST'])
+def store_records():
+    file = request.json.get("file")
+    if not file:
+        return jsonify({"error": "No file information provided"}), 400
+
+    return create_records(qdrant_document_store, file)
 
 @api.route('/pdfs', methods=['POST'])
 def store_pdfs():
