@@ -14,30 +14,36 @@ ollama_url = dotenv_values(find_dotenv(".flaskenv")).get('OLLAMA_URL')
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.ERROR)
 
-def get_documents(vdb, to_be_converted_text):
+def get_documents(vdb, to_be_converted_text, generation_kwargs_config=None):
     """
     This function returns a list of stored vectorized documents from the Qdrant document store
     based on embedded text (converted text).
     :return: A list of stored vectorized documents
     """
-    text_embedder = OllamaTextEmbedder(model=ollama_model, url=ollama_url)
+    if generation_kwargs_config is None:
+        generation_kwargs_config = {"temperature": 0.0}
+
+    text_embedder = OllamaTextEmbedder(model=ollama_model, url=ollama_url, generation_kwargs=generation_kwargs_config)
     embedded_text = text_embedder.run(text=to_be_converted_text)
     embedding_retriever = QdrantEmbeddingRetriever(document_store=vdb)
     retrieved_documents = embedding_retriever.run(query_embedding=embedded_text['embedding'])
 
     return retrieved_documents
 
-def create_vectorized_documents(vdb, file):
+def create_vectorized_documents(vdb, file, generation_kwargs_config=None):
     """
     This function stores vectorized documents in Qdrant document store.
     :return:
     """
+    if generation_kwargs_config is None:
+        generation_kwargs_config = {"temperature": 0.0}
+
     documents = convert_pdf_to_document(file["file_path"], file["authors"])
     document_cleaner = DocumentCleaner(remove_repeated_substrings=True)
     cleaned_documents = document_cleaner.run(documents=documents)
     document_splitter = DocumentSplitter(split_by="word", split_length=400)
     split_documents = document_splitter.run(documents=cleaned_documents['documents'])
-    document_embedder = OllamaDocumentEmbedder(model=ollama_model, url=ollama_url)
+    document_embedder = OllamaDocumentEmbedder(model=ollama_model, url=ollama_url, generation_kwargs=generation_kwargs_config)
     vectorized_documents = document_embedder.run(documents=split_documents['documents'])
 
     try:
