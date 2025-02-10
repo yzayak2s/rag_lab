@@ -6,7 +6,8 @@ from dotenv import dotenv_values, find_dotenv
 from haystack import Document
 from haystack.components.preprocessors import DocumentSplitter
 from haystack.document_stores.types import DuplicatePolicy
-from haystack_integrations.components.embedders.ollama import OllamaDocumentEmbedder
+from haystack_integrations.components.embedders.ollama import OllamaDocumentEmbedder, OllamaTextEmbedder
+from haystack_integrations.components.retrievers.qdrant import QdrantEmbeddingRetriever
 
 from models.Record import Record
 
@@ -79,3 +80,20 @@ def create_records(vdb, file, generation_kwargs_config=None):
         return {"count": vdb.write_documents(documents=vectorized_documents['documents'], policy=DuplicatePolicy.SKIP)}
     except Exception as e:
         logger.error(f"Failed to write records as documents to Qdrant document store: {e}")
+
+def get_records(vdb, to_be_converted_text, generation_kwargs_config=None):
+    """
+    This function returns a list of stored records as vectorized documents from the Qdrant document store
+    based on embedded text (converted text).
+    :return: A list of stored records as vectorized documents
+    """
+
+    if generation_kwargs_config is None:
+        generation_kwargs_config = {"temperature": 0.0}
+
+    text_embedder = OllamaTextEmbedder(model=ollama_model, url=ollama_url, generation_kwargs=generation_kwargs_config)
+    embedded_text = text_embedder.run(text=to_be_converted_text)
+    embedding_retriever = QdrantEmbeddingRetriever (document_store=vdb)
+    retrieved_documents = embedding_retriever.run(query_embedding=embedded_text['embedding'])
+
+    return retrieved_documents

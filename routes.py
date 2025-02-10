@@ -7,7 +7,7 @@ from services.document_service import get_documents, create_vectorized_documents
 from services.chat_service import chat_documents
 from qdrant_store import get_qdrant_document_store
 from generator import get_ollama_generator
-from services.record_service import create_records
+from services.record_service import create_records, get_records
 
 # Define the blueprint
 api = Blueprint("api", __name__)
@@ -23,6 +23,18 @@ def store_pdf():
         return jsonify({"error": "No file information provided"}), 400
 
     return create_vectorized_documents(qdrant_document_store, file)
+
+@api.route('/getRecords', methods=['POST'])
+def get_vectorized_records():
+    to_be_converted_text = request.json.get("to_be_converted_text")
+    if not to_be_converted_text:
+        return jsonify({"error": "No text information provided"}), 400
+    retrieved_documents = get_records(
+        vdb=qdrant_document_store,
+        to_be_converted_text=to_be_converted_text
+    )
+
+    return {"vec_docs": retrieved_documents}
 
 @api.route('/record', methods=['POST'])
 def store_records():
