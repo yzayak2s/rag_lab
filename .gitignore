@@ -30,7 +30,6 @@ requirements.txt
 *.pb
 logs/
 checkpoints/
-models/
 saved_models/
 
 # Vector database files
