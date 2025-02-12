@@ -16,14 +16,6 @@ api = Blueprint("api", __name__)
 ollama_generator = get_ollama_generator()
 qdrant_document_store = get_qdrant_document_store()
 
-@api.route('/storePDF', methods=['POST'])
-def store_pdf():
-    file = request.json.get("file")
-    if not file:
-        return jsonify({"error": "No file information provided"}), 400
-
-    return create_vectorized_documents(qdrant_document_store, file)
-
 @api.route('/getRecords', methods=['POST'])
 def get_vectorized_records():
     to_be_converted_text = request.json.get("to_be_converted_text")
@@ -44,15 +36,7 @@ def store_records():
 
     return create_records(qdrant_document_store, file)
 
-@api.route('/pdfs', methods=['POST'])
-def store_pdfs():
-    files = request.json.get("files")
-    if not files:
-        return jsonify({"error": "No files information provided"}), 400
-    count_array = [create_vectorized_documents(qdrant_document_store, file_object['file'])['count'] for file_object in files]
-    return {"total_count": reduce(add, count_array)}
-
-@api.route('/getVecDocs', methods=['POST'])
+@api.route('/getPDFs', methods=['POST'])
 def get_vectorized_documents():
     to_be_converted_text = request.json.get("to_be_converted_text")
     if not to_be_converted_text:
@@ -63,6 +47,22 @@ def get_vectorized_documents():
     )
 
     return {"vec_docs": retrieved_documents}
+
+@api.route('/pdf', methods=['POST'])
+def store_pdf():
+    file = request.json.get("file")
+    if not file:
+        return jsonify({"error": "No file information provided"}), 400
+
+    return create_vectorized_documents(qdrant_document_store, file)
+
+@api.route('/pdfs', methods=['POST'])
+def store_pdfs():
+    files = request.json.get("files")
+    if not files:
+        return jsonify({"error": "No files information provided"}), 400
+    count_array = [create_vectorized_documents(qdrant_document_store, file_object['file'])['count'] for file_object in files]
+    return {"total_count": reduce(add, count_array)}
 
 @api.route('/chat', methods=['POST'])
 def chat_with_documents():
