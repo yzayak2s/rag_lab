@@ -15,7 +15,6 @@ pip-wheel-metadata/
 poetry.lock
 Pipfile
 Pipfile.lock
-requirements.txt
 
 # Machine learning model files and training artifacts
 *.h5
