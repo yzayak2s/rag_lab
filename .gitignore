@@ -8,7 +8,7 @@ __pycache__/
 *.log
 
 # Virtual environment and dependency management
-venv/
+.venv/
 env/
 *.egg-info/
 pip-wheel-metadata/
