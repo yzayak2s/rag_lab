@@ -1,5 +1,6 @@
 FLASK_RUN=app.py
 FLASK_ENV=development
 FLASK_RUN_PORT=5001
-OLLAMA_MODEL=llama3.2
+OLLAMA_CHAT_MODEL=llama3.2
+OLLAMA_EMBED_MODEL=nomic-embed-text
 OLLAMA_URL=http://localhost:11434

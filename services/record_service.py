@@ -11,7 +11,7 @@ from haystack_integrations.components.retrievers.qdrant import QdrantEmbeddingRe
 
 from models.Record import Record
 
-ollama_model = dotenv_values(find_dotenv(".flaskenv")).get('OLLAMA_MODEL')
+ollama_embed_model = dotenv_values(find_dotenv(".flaskenv")).get('OLLAMA_EMBED_MODEL')
 ollama_url = dotenv_values(find_dotenv(".flaskenv")).get('OLLAMA_URL')
 
 logger = logging.getLogger(__name__)
@@ -70,7 +70,7 @@ def create_records(vdb, file, generation_kwargs_config=None):
     split_documents = document_splitter.run(documents=documents)
 
     document_embedder = OllamaDocumentEmbedder(
-        model=ollama_model,
+        model=ollama_embed_model,
         url=ollama_url,
         generation_kwargs=generation_kwargs_config
     )
@@ -91,7 +91,7 @@ def get_records(vdb, to_be_converted_text, generation_kwargs_config=None):
     if generation_kwargs_config is None:
         generation_kwargs_config = {"temperature": 0.0}
 
-    text_embedder = OllamaTextEmbedder(model=ollama_model, url=ollama_url, generation_kwargs=generation_kwargs_config)
+    text_embedder = OllamaTextEmbedder(model=ollama_embed_model, url=ollama_url, generation_kwargs=generation_kwargs_config)
     embedded_text = text_embedder.run(text=to_be_converted_text)
     embedding_retriever = QdrantEmbeddingRetriever (document_store=vdb)
     retrieved_documents = embedding_retriever.run(query_embedding=embedded_text['embedding'])
