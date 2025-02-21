@@ -1,0 +1,25 @@
+[project]
+name = "rag-lab"
+version = "1.0.0"
+description = "In diesem Projekt geht es darum, ein RAG-System zu entwickeln. Dabei soll das System die Durchführung wissenschaftlicher Literaturanalysen erheblich erleichtern."
+authors = [
+    {name = "youneszayakh",email = "younes.zayakh@smail.inf.h-brs.de"}
+]
+readme = "README.md"
+requires-python = "3.10.7"
+dependencies = [
+    "flask (>=3.1.0,<4.0.0)",
+    "haystack-ai (==2.10.0)",
+    "numpy (==1.26.4)",
+    "pypdf (>=5.3.0,<6.0.0)",
+    "ollama-haystack (==2.3.0)",
+    "watchdog (>=6.0.0,<7.0.0)",
+    "pdfminer-six (>=20240706,<20240707)",
+    "torch (==2.2.2)",
+    "python-dotenv (>=1.0.1,<2.0.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
