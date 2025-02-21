@@ -6,7 +6,7 @@ from haystack.document_stores.types import DuplicatePolicy
 from haystack_integrations.components.embedders.ollama import OllamaTextEmbedder, OllamaDocumentEmbedder
 from haystack_integrations.components.retrievers.qdrant import QdrantEmbeddingRetriever
 
-from services.pdf_service import convert_pdf_to_document
+from src.services.pdf_service import convert_pdf_to_document
 
 ollama_embed_model = dotenv_values(find_dotenv(".flaskenv")).get('OLLAMA_EMBED_MODEL')
 ollama_url = dotenv_values(find_dotenv(".flaskenv")).get('OLLAMA_URL')

@@ -3,11 +3,11 @@ from operator import add
 
 from flask import Blueprint, request, jsonify
 
-from services.document_service import get_documents, create_vectorized_documents
-from services.chat_service import chat_documents
-from qdrant_store import get_qdrant_document_store
-from generator import get_ollama_generator
-from services.record_service import create_records, get_records
+from src.services.document_service import get_documents, create_vectorized_documents
+from src.services.chat_service import chat_documents
+from src.qdrant_store import get_document_store
+from src.generator import get_ollama_generator
+from src.services.record_service import create_records, get_records
 
 # Define the blueprint
 api = Blueprint("api", __name__)

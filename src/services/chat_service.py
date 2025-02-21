@@ -1,7 +1,7 @@
 from haystack.components.builders import PromptBuilder
 
-from services.prompt_service import get_prompt_template
-from services.document_service import get_documents
+from src.services.prompt_service import get_prompt_template
+from src.services.document_service import get_documents
 
 def chat_documents(vdb, question, generator):
     """

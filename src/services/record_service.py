@@ -9,7 +9,7 @@ from haystack.document_stores.types import DuplicatePolicy
 from haystack_integrations.components.embedders.ollama import OllamaDocumentEmbedder, OllamaTextEmbedder
 from haystack_integrations.components.retrievers.qdrant import QdrantEmbeddingRetriever
 
-from models.Record import Record
+from src.models.Record import Record
 
 ollama_embed_model = dotenv_values(find_dotenv(".flaskenv")).get('OLLAMA_EMBED_MODEL')
 ollama_url = dotenv_values(find_dotenv(".flaskenv")).get('OLLAMA_URL')
