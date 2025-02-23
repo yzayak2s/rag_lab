@@ -9,5 +9,5 @@ qdrant_document_store = QdrantDocumentStore(
     hnsw_config={"m": 64, "ef_construct": 512}, # Optional
 )
 
-def get_qdrant_document_store():
+def get_document_store():
     return qdrant_document_store

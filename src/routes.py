@@ -5,7 +5,7 @@ from flask import Blueprint, request, jsonify
 
 from src.services.document_service import get_documents, create_vectorized_documents
 from src.services.chat_service import chat_documents
-from src.qdrant_store import get_document_store
+from src.document_store import get_document_store
 from src.generator import get_ollama_generator
 from src.services.record_service import create_records, get_records
 
@@ -14,7 +14,7 @@ api = Blueprint("api", __name__)
 
 # Initialize ollama generator and vector database
 ollama_generator = get_ollama_generator()
-qdrant_document_store = get_qdrant_document_store()
+document_store = get_document_store()
 
 @api.route('/getRecords', methods=['POST'])
 def get_vectorized_records():
@@ -22,7 +22,7 @@ def get_vectorized_records():
     if not to_be_converted_text:
         return jsonify({"error": "No text information provided"}), 400
     retrieved_documents = get_records(
-        vdb=qdrant_document_store,
+        vdb=document_store,
         to_be_converted_text=to_be_converted_text
     )
 
@@ -34,7 +34,7 @@ def store_records():
     if not file:
         return jsonify({"error": "No file information provided"}), 400
 
-    return create_records(qdrant_document_store, file)
+    return create_records(document_store, file)
 
 @api.route('/getPDFs', methods=['POST'])
 def get_vectorized_documents():
@@ -42,7 +42,7 @@ def get_vectorized_documents():
     if not to_be_converted_text:
         return jsonify({"error": "No text information provided"}), 400
     retrieved_documents = get_documents(
-        vdb=qdrant_document_store,
+        vdb=document_store,
         to_be_converted_text=to_be_converted_text
     )
 
@@ -54,14 +54,14 @@ def store_pdf():
     if not file:
         return jsonify({"error": "No file information provided"}), 400
 
-    return create_vectorized_documents(qdrant_document_store, file)
+    return create_vectorized_documents(document_store, file)
 
 @api.route('/pdfs', methods=['POST'])
 def store_pdfs():
     files = request.json.get("files")
     if not files:
         return jsonify({"error": "No files information provided"}), 400
-    count_array = [create_vectorized_documents(qdrant_document_store, file_object['file'])['count'] for file_object in files]
+    count_array = [create_vectorized_documents(document_store, file_object['file'])['count'] for file_object in files]
     return {"total_count": reduce(add, count_array)}
 
 @api.route('/chat', methods=['POST'])
@@ -71,7 +71,7 @@ def chat_with_documents():
         return jsonify({"error": "No question provided"}), 400
 
     prompted_documents = chat_documents(
-        vdb=qdrant_document_store,
+        vdb=document_store,
         question=question,
         generator=ollama_generator
     )
