@@ -57,33 +57,42 @@ def drop_record():
     except Exception as e:
         return {"error": f"Something went wrong when trying to delete collection with name {document_store.index}: {e}"}
 
-@api.route('/getPDFs', methods=['POST'])
+@api.route('/getDocuments', methods=['POST'])
 def get_vectorized_documents():
     to_be_converted_text = request.json.get("to_be_converted_text")
     if not to_be_converted_text:
         return jsonify({"error": "No text information provided"}), 400
-    retrieved_documents = get_documents(
-        vdb=document_store,
-        to_be_converted_text=to_be_converted_text
-    )
+    try:
+        retrieved_documents = get_documents(
+            vdb=document_store,
+            to_be_converted_text=to_be_converted_text
+        )
 
-    return {"vec_docs": retrieved_documents}
+        return {"vec_docs": retrieved_documents}
+    except Exception as e:
+        return {"error": f"Something went wrong with retrieving documents: {e}"}, 500
 
-@api.route('/pdf', methods=['POST'])
+@api.route('/document', methods=['POST'])
 def store_pdf():
     file = request.json.get("file")
     if not file:
         return jsonify({"error": "No file information provided"}), 400
 
-    return create_vectorized_documents(document_store, file)
+    try:
+        return create_vectorized_documents(document_store, file)
+    except Exception as e:
+        return {"error": f"Something went wrong with writing a pdf as documents in document store: {e}"}, 500
 
-@api.route('/pdfs', methods=['POST'])
+@api.route('/documents', methods=['POST'])
 def store_pdfs():
     files = request.json.get("files")
     if not files:
         return jsonify({"error": "No files information provided"}), 400
-    count_array = [create_vectorized_documents(document_store, file_object['file'])['count'] for file_object in files]
-    return {"total_count": reduce(add, count_array)}
+    try:
+        count_array = [create_vectorized_documents(document_store, file_object['file'])['count'] for file_object in files]
+        return {"total_count": reduce(add, count_array)}
+    except Exception as e:
+        return {"error": f"Something went wrong with writing pdfs as documents in document store: {e}"}, 500
 
 @api.route('/chat', methods=['POST'])
 def chat_with_documents():

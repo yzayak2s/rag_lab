@@ -23,12 +23,15 @@ def get_documents(vdb, to_be_converted_text, generation_kwargs_config=None):
     if generation_kwargs_config is None:
         generation_kwargs_config = {"temperature": 0.0}
 
-    text_embedder = OllamaTextEmbedder(model=ollama_embed_model, url=ollama_url, generation_kwargs=generation_kwargs_config)
-    embedded_text = text_embedder.run(text=to_be_converted_text)
-    embedding_retriever = QdrantEmbeddingRetriever(document_store=vdb)
-    retrieved_documents = embedding_retriever.run(query_embedding=embedded_text['embedding'])
+    try:
+        text_embedder = OllamaTextEmbedder(model=ollama_embed_model, url=ollama_url, generation_kwargs=generation_kwargs_config)
+        embedded_text = text_embedder.run(text=to_be_converted_text)
+        embedding_retriever = QdrantEmbeddingRetriever(document_store=vdb)
+        retrieved_documents = embedding_retriever.run(query_embedding=embedded_text['embedding'])
 
-    return retrieved_documents
+        return retrieved_documents
+    except Exception as e:
+        raise e
 
 def create_vectorized_documents(vdb, file, generation_kwargs_config=None):
     """
@@ -51,3 +54,4 @@ def create_vectorized_documents(vdb, file, generation_kwargs_config=None):
         return {"count": vdb.write_documents(documents=vectorized_documents['documents'], policy=DuplicatePolicy.SKIP)}
     except Exception as e:
         logger.error(f"Failed to write documents to Qdrant document store: {e}")
+        raise e
