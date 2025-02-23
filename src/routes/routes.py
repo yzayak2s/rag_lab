@@ -47,6 +47,14 @@ def remove_records():
     except Exception as e:
         return {"error": f"Something went wrong with deleting documents: {e}"}, 500
 
+@api.route('/record/drop', methods=['DELETE'])
+def drop_record():
+    try:
+        is_deleted = document_store.client.delete_collection(collection_name=document_store.index)
+        return jsonify({"message": f"Successfully deleted '{document_store.index}' collection", "result": is_deleted})
+    except Exception as e:
+        return {"error": f"Something went wrong when trying to delete collection with name {document_store.index}: {e}"}
+
 @api.route('/getPDFs', methods=['POST'])
 def get_vectorized_documents():
     to_be_converted_text = request.json.get("to_be_converted_text")
