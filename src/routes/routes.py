@@ -7,7 +7,7 @@ from src.services.document_service import get_documents, create_vectorized_docum
 from src.services.chat_service import chat_documents
 from src.document_store import get_document_store
 from src.generator import get_ollama_generator
-from src.services.record_service import create_records, get_records
+from src.services.record_service import create_records, get_records, delete_records
 
 # Define the blueprint
 api = Blueprint("api", __name__)
@@ -35,6 +35,17 @@ def store_records():
         return jsonify({"error": "No file information provided"}), 400
 
     return create_records(document_store, file)
+
+@api.route('/record', methods=['DELETE'])
+def remove_records():
+    documents = request.json.get("documents")
+    if not documents and documents != []:
+        return jsonify({"error": "No documents prop provided"}), 400
+
+    try:
+        return jsonify(delete_records(document_store))
+    except Exception as e:
+        return {"error": f"Something went wrong with deleting documents: {e}"}, 500
 
 @api.route('/getPDFs', methods=['POST'])
 def get_vectorized_documents():

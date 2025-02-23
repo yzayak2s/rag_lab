@@ -8,6 +8,7 @@ from haystack.components.preprocessors import DocumentSplitter
 from haystack.document_stores.types import DuplicatePolicy
 from haystack_integrations.components.embedders.ollama import OllamaDocumentEmbedder, OllamaTextEmbedder
 from haystack_integrations.components.retrievers.qdrant import QdrantEmbeddingRetriever
+from haystack_integrations.document_stores.qdrant import QdrantDocumentStore
 
 from src.models.Record import Record
 
@@ -17,7 +18,7 @@ ollama_url = dotenv_values(find_dotenv(".flaskenv")).get('OLLAMA_URL')
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.ERROR)
 
-def create_records(vdb, file, generation_kwargs_config=None):
+def create_records(vdb: QdrantDocumentStore, file, generation_kwargs_config=None):
     """
     This function stores records as vectorized documents in Qdrant document store.
     :return:
@@ -81,7 +82,7 @@ def create_records(vdb, file, generation_kwargs_config=None):
     except Exception as e:
         logger.error(f"Failed to write records as documents to Qdrant document store: {e}")
 
-def get_records(vdb, to_be_converted_text, generation_kwargs_config=None):
+def get_records(vdb: QdrantDocumentStore, to_be_converted_text, generation_kwargs_config=None):
     """
     This function returns a list of stored records as vectorized documents from the Qdrant document store
     based on embedded text (converted text).
@@ -97,3 +98,19 @@ def get_records(vdb, to_be_converted_text, generation_kwargs_config=None):
     retrieved_documents = embedding_retriever.run(query_embedding=embedded_text['embedding'])
 
     return retrieved_documents
+
+def delete_records(vdb: QdrantDocumentStore):
+    """
+    This function deletes all stored documents from the document store.
+    :param vdb:
+    :return:
+    """
+    try:
+        vdb.recreate_collection(
+            collection_name=vdb.index,
+            distance=vdb.get_distance(similarity=vdb.similarity),
+            embedding_dim=vdb.embedding_dim
+        )
+    except Exception as e:
+        logger.error(f"Failed to delete documents from document store: {e}")
+        raise e
