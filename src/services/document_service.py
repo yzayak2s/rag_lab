@@ -55,3 +55,19 @@ def create_vectorized_documents(vdb, file, generation_kwargs_config=None):
     except Exception as e:
         logger.error(f"Failed to write documents to Qdrant document store: {e}")
         raise e
+
+def delete_documents(vdb):
+    """
+    This function deletes all stored documents from the document store.
+    :param vdb:
+    :return:
+    """
+    try:
+        vdb.recreate_collection(
+            collection_name=vdb.index,
+            distance=vdb.get_distance(similarity=vdb.similarity),
+            embedding_dim=vdb.embedding_dim
+        )
+    except Exception as e:
+        logger.error(f"Failed to delete documents from document store: {e}")
+        raise e

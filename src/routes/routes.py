@@ -3,7 +3,7 @@ from operator import add
 
 from flask import Blueprint, request, jsonify
 
-from src.services.document_service import get_documents, create_vectorized_documents
+from src.services.document_service import get_documents, create_vectorized_documents, delete_documents
 from src.services.chat_service import chat_documents
 from src.document_store import get_document_store
 from src.generator import get_ollama_generator
@@ -93,6 +93,25 @@ def store_pdfs():
         return {"total_count": reduce(add, count_array)}
     except Exception as e:
         return {"error": f"Something went wrong with writing pdfs as documents in document store: {e}"}, 500
+
+@api.route('/documents', methods=['DELETE'])
+def remove_documents():
+    documents = request.json.get("documents")
+    if not documents and documents != []:
+        return jsonify({"error": "No documents prop provided"}), 400
+
+    try:
+        return jsonify(delete_documents(document_store))
+    except Exception as e:
+        return {"error": f"Something went wrong with deleting documents: {e}"}, 500
+
+@api.route('/documents/drop', methods=['DELETE'])
+def drop_documents():
+    try:
+        is_deleted = document_store.client.delete_collection(collection_name=document_store.index)
+        return jsonify({"message": f"Successfully deleted '{document_store.index}' collection", "result": is_deleted})
+    except Exception as e:
+        return {"error": f"Something went wrong when trying to delete collection with name {document_store.index}: {e}"}
 
 @api.route('/chat', methods=['POST'])
 def chat_with_documents():
