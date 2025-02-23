@@ -21,12 +21,14 @@ def get_vectorized_records():
     to_be_converted_text = request.json.get("to_be_converted_text")
     if not to_be_converted_text:
         return jsonify({"error": "No text information provided"}), 400
-    retrieved_documents = get_records(
-        vdb=document_store,
-        to_be_converted_text=to_be_converted_text
-    )
-
-    return {"vec_docs": retrieved_documents}
+    try:
+        retrieved_documents = get_records(
+            vdb=document_store,
+            to_be_converted_text=to_be_converted_text
+        )
+        return {"vec_docs": retrieved_documents}
+    except Exception as e:
+        return {"error": f"Something went wrong with retrieving documents: {e}"}, 500
 
 @api.route('/record', methods=['POST'])
 def store_records():

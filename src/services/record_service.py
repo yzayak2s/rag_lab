@@ -92,10 +92,14 @@ def get_records(vdb: QdrantDocumentStore, to_be_converted_text, generation_kwarg
     if generation_kwargs_config is None:
         generation_kwargs_config = {"temperature": 0.0}
 
-    text_embedder = OllamaTextEmbedder(model=ollama_embed_model, url=ollama_url, generation_kwargs=generation_kwargs_config)
-    embedded_text = text_embedder.run(text=to_be_converted_text)
-    embedding_retriever = QdrantEmbeddingRetriever (document_store=vdb)
-    retrieved_documents = embedding_retriever.run(query_embedding=embedded_text['embedding'])
+    try:
+        text_embedder = OllamaTextEmbedder(model=ollama_embed_model, url=ollama_url, generation_kwargs=generation_kwargs_config)
+        embedded_text = text_embedder.run(text=to_be_converted_text)
+        embedding_retriever = QdrantEmbeddingRetriever (document_store=vdb)
+        retrieved_documents = embedding_retriever.run(query_embedding=embedded_text['embedding'])
+    except Exception as e:
+        logger.error(f"Failed to retrieve records from document store: {e}")
+        raise e
 
     return retrieved_documents
 
