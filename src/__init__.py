@@ -5,7 +5,7 @@ import sys
 import time
 
 from flask import Flask
-from src.routes import api
+from src.routes.routes import api
 from dotenv import load_dotenv
 from watchdog.observers import Observer
 from watchdog.events import LoggingEventHandler
