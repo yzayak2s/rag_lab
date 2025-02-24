@@ -4,7 +4,6 @@ import os
 import pandas as pd
 from dotenv import dotenv_values, find_dotenv
 from haystack import Document
-from haystack.components.preprocessors import DocumentSplitter
 from haystack.document_stores.types import DuplicatePolicy
 from haystack_integrations.components.embedders.ollama import OllamaDocumentEmbedder, OllamaTextEmbedder
 from haystack_integrations.components.retrievers.qdrant import QdrantEmbeddingRetriever
@@ -49,9 +48,6 @@ def create_records(vdb: QdrantDocumentStore, file, generation_kwargs_config=None
     # Iterate through data frame and for each row instantiate a record of type Record.
     records = [Record(*row) for row in csv_df.itertuples(index=False)]
 
-    document_splitter = DocumentSplitter(split_by="sentence", split_length=1)
-    document_splitter.warm_up()
-
     documents = []
 
     # Iterate through records to instantiate document objects of type Document
@@ -68,14 +64,12 @@ def create_records(vdb: QdrantDocumentStore, file, generation_kwargs_config=None
             )
         )
 
-    split_documents = document_splitter.run(documents=documents)
-
     document_embedder = OllamaDocumentEmbedder(
         model=ollama_embed_model,
         url=ollama_url,
         generation_kwargs=generation_kwargs_config
     )
-    vectorized_documents = document_embedder.run(documents=split_documents['documents'])
+    vectorized_documents = document_embedder.run(documents=documents)
 
     try:
         return {"count": vdb.write_documents(documents=vectorized_documents['documents'], policy=DuplicatePolicy.SKIP)}
