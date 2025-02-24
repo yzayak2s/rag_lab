@@ -33,6 +33,18 @@ def get_documents(vdb, to_be_converted_text, generation_kwargs_config=None):
     except Exception as e:
         raise e
 
+def get_all_documents(vdb):
+    """
+    This function returns a list of stored vectorized documents from the document store.
+
+    :return: A list of stored vectorized documents
+    """
+    try:
+        return vdb.filter_documents()
+    except Exception as e:
+        logger.error(f"Failed to retrieve documents from document store: {e}")
+        raise e
+
 def create_vectorized_documents(vdb, file, generation_kwargs_config=None):
     """
     This function stores vectorized documents in Qdrant document store.

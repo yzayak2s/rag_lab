@@ -3,7 +3,7 @@ from operator import add
 
 from flask import Blueprint, request, jsonify
 
-from src.services.document_service import get_documents, create_vectorized_documents, delete_documents
+from src.services.document_service import get_documents, create_vectorized_documents, delete_documents, get_all_documents
 from src.services.chat_service import chat_documents
 from src.document_store import get_document_store
 from src.generator import get_ollama_generator
@@ -63,6 +63,13 @@ def drop_record():
         return jsonify({"message": f"Successfully deleted '{document_store.index}' collection", "result": is_deleted})
     except Exception as e:
         return {"error": f"Something went wrong when trying to delete collection with name {document_store.index}: {e}"}
+
+@api.route('/document', methods=['GET'])
+def retrieve_all_documents():
+    try:
+        return get_all_documents(document_store)
+    except Exception as e:
+        return {"error": f"Something went wrong with retrieving documents: {e}"}, 500
 
 @api.route('/getDocuments', methods=['POST'])
 def get_vectorized_documents():
