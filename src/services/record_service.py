@@ -103,6 +103,18 @@ def get_records(vdb: QdrantDocumentStore, to_be_converted_text, generation_kwarg
 
     return retrieved_documents
 
+def get_all_records(vdb: QdrantDocumentStore):
+    """
+    This function returns a list of stored records as vectorized documents from the document store.
+
+    :return: A list of stored records as vectorized documents
+    """
+    try:
+        return vdb.filter_documents()
+    except Exception as e:
+        logger.error(f"Failed to retrieve records from document store: {e}")
+        raise e
+
 def delete_records(vdb: QdrantDocumentStore):
     """
     This function deletes all stored documents from the document store.

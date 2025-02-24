@@ -7,7 +7,7 @@ from src.services.document_service import get_documents, create_vectorized_docum
 from src.services.chat_service import chat_documents
 from src.document_store import get_document_store
 from src.generator import get_ollama_generator
-from src.services.record_service import create_records, get_records, delete_records
+from src.services.record_service import create_records, get_records, delete_records, get_all_records
 
 # Define the blueprint
 api = Blueprint("api", __name__)
@@ -29,6 +29,13 @@ def get_vectorized_records():
         return {"vec_docs": retrieved_documents}
     except Exception as e:
         return {"error": f"Something went wrong with retrieving documents: {e}"}, 500
+
+@api.route('/record', methods=['GET'])
+def retrieve_records():
+    try:
+        return jsonify(get_all_records(document_store))
+    except Exception  as e:
+        return {"error": f"Something went wrong with retrieving all records: {e}"}, 400
 
 @api.route('/record', methods=['POST'])
 def store_records():
