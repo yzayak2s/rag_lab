@@ -4,7 +4,8 @@ from haystack.components.writers import DocumentWriter
 
 from haystack.components.preprocessors import DocumentCleaner, DocumentSplitter
 from haystack.document_stores.types import DuplicatePolicy
-from haystack_integrations.components.embedders.ollama import OllamaDocumentEmbedder
+from haystack_integrations.components.embedders.ollama import OllamaDocumentEmbedder, OllamaTextEmbedder
+from haystack_integrations.components.retrievers.qdrant import QdrantEmbeddingRetriever
 
 ollama_embed_model = dotenv_values(find_dotenv(".quartenv")).get('OLLAMA_EMBED_MODEL')
 ollama_url = dotenv_values(find_dotenv(".quartenv")).get('OLLAMA_URL')
@@ -31,6 +32,8 @@ def create_records_pipeline(vdb, generation_kwargs_config=None):
 def create_docs_first_process_pipeline(generation_kwargs_config=None):
     """
     Creates a haystack first process pipeline for documents and returns it.
+
+    :param generation_kwargs_config:
     :return:
     """
     document_cleaner = DocumentCleaner(remove_repeated_substrings=True)
@@ -49,4 +52,24 @@ def create_docs_first_process_pipeline(generation_kwargs_config=None):
 
     pipeline.connect(sender="document_cleaner.documents", receiver="document_splitter.documents")
     pipeline.connect(sender="document_splitter.documents", receiver="document_embedder.documents")
+    return pipeline
+
+def create_docs_second_process_pipeline(vdb, generation_kwargs_config=None):
+    """
+    Creates a haystack second process pipeline for documents and returns it.
+    :param vdb:
+    :param generation_kwargs_config:
+    :return:
+    """
+    text_embedder = OllamaTextEmbedder(
+        model=ollama_embed_model, url=ollama_url,
+        generation_kwargs=generation_kwargs_config
+    )
+    embedding_retriever = QdrantEmbeddingRetriever(document_store=vdb)
+
+    pipeline = Pipeline()
+    pipeline.add_component(instance=text_embedder, name="text_embedder")
+    pipeline.add_component(instance=embedding_retriever, name="embedding_retriever")
+
+    pipeline.connect(sender="text_embedder.embedding", receiver="embedding_retriever")
     return pipeline

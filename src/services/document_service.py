@@ -1,15 +1,9 @@
 import logging
 
-from dotenv import dotenv_values, find_dotenv
 from haystack.document_stores.types import DuplicatePolicy
-from haystack_integrations.components.embedders.ollama import OllamaTextEmbedder
-from haystack_integrations.components.retrievers.qdrant import QdrantEmbeddingRetriever
 
-from src.pipeline import create_docs_first_process_pipeline
+from src.pipeline import create_docs_first_process_pipeline, create_docs_second_process_pipeline
 from src.services.pdf_service import convert_pdf_to_document
-
-ollama_embed_model = dotenv_values(find_dotenv(".quartenv")).get('OLLAMA_EMBED_MODEL')
-ollama_url = dotenv_values(find_dotenv(".quartenv")).get('OLLAMA_URL')
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.ERROR)
@@ -24,10 +18,10 @@ async def get_documents(vdb, to_be_converted_text, generation_kwargs_config=None
         generation_kwargs_config = {"temperature": 0.0}
 
     try:
-        text_embedder = OllamaTextEmbedder(model=ollama_embed_model, url=ollama_url, generation_kwargs=generation_kwargs_config)
-        embedded_text = text_embedder.run(text=to_be_converted_text)
-        embedding_retriever = QdrantEmbeddingRetriever(document_store=vdb)
-        retrieved_documents = embedding_retriever.run(query_embedding=embedded_text['embedding'])
+        pipeline = create_docs_second_process_pipeline(vdb, generation_kwargs_config)
+        retrieved_documents = pipeline.run(
+            data={"text_embedder": {"text": to_be_converted_text}},
+        )
         vdb.client.close()
         return retrieved_documents
     except Exception as e:
@@ -58,7 +52,7 @@ async def create_vectorized_documents(vdb, files, generation_kwargs_config=None)
     documents = []
     for file_object in files:
         converted_documents = convert_pdf_to_document(file_object["file_path"], file_object["authors"])
-        pipeline = create_docs_first_process_pipeline()
+        pipeline = create_docs_first_process_pipeline(generation_kwargs_config)
         vectorized_documents = pipeline.run(
             data={"document_cleaner": {"documents": converted_documents}},
         )
