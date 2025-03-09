@@ -1,15 +1,11 @@
 import logging
-import os
-
-import pandas as pd
 from dotenv import dotenv_values, find_dotenv
-from haystack import Document
 from haystack_integrations.components.embedders.ollama import OllamaTextEmbedder
 from haystack_integrations.components.retrievers.qdrant import QdrantEmbeddingRetriever
 from haystack_integrations.document_stores.qdrant import QdrantDocumentStore
 
+from src.components.CustomXLSXToDocuments import CustomXLSXToDocuments
 from src.pipeline import create_records_pipeline
-from src.models.Record import Record
 
 ollama_embed_model = dotenv_values(find_dotenv(".quartenv")).get('OLLAMA_EMBED_MODEL')
 ollama_url = dotenv_values(find_dotenv(".quartenv")).get('OLLAMA_URL')
@@ -26,43 +22,8 @@ async def create_records(vdb: QdrantDocumentStore, file, generation_kwargs_confi
     if generation_kwargs_config is None:
         generation_kwargs_config = {"temperature": 0.0}
 
-    # Get columns specified by column names from Excel file
-    dd = pd.read_excel(
-        file['file_path'],
-        usecols=["Authors", "Article Title", "Source Title", "Abstract", "Publication Year"],
-    )
-    csv_dd_file = 'qdrant/storage_local/xlsxs/literature_web_of_science.csv'
-
-    # Convert input of Excel file to csv and save it local
-    dd.to_csv(
-        path_or_buf=csv_dd_file,
-        index=False, sep="|", header=False
-    )
-
-    # Get saved csv file
-    csv_df = pd.read_csv(csv_dd_file, header=None, sep="|")
-
-    # Delete created csv file
-    os.remove(csv_dd_file)
-
-    # Iterate through data frame and for each row instantiate a record of type Record.
-    records = [Record(*row) for row in csv_df.itertuples(index=False)]
-
-    documents = []
-
-    # Iterate through records to instantiate document objects of type Document
-    for row in records:
-        documents.append(
-            Document(
-                content=row.abstract,
-                meta={
-                    "authors": row.authors,
-                    "article_title": row.article_title,
-                    "source_title": row.source_title,
-                    "publication_year": row.publication_year
-                }
-            )
-        )
+    custom_xlsx_to_docs_component = CustomXLSXToDocuments()
+    documents = custom_xlsx_to_docs_component.run(file=file)
 
     try:
         pipeline = create_records_pipeline(vdb)
