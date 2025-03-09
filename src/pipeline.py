@@ -54,6 +54,7 @@ def create_docs_first_process_pipeline(generation_kwargs_config=None):
     pipeline.connect(sender="document_splitter.documents", receiver="document_embedder.documents")
     return pipeline
 
+# TODO: Maybe make it as default and for general use (outsource?!)
 def create_docs_second_process_pipeline(vdb, generation_kwargs_config=None):
     """
     Creates a haystack second process pipeline for documents and returns it.
