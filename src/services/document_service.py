@@ -8,13 +8,13 @@ from haystack_integrations.components.retrievers.qdrant import QdrantEmbeddingRe
 
 from src.services.pdf_service import convert_pdf_to_document
 
-ollama_embed_model = dotenv_values(find_dotenv(".flaskenv")).get('OLLAMA_EMBED_MODEL')
-ollama_url = dotenv_values(find_dotenv(".flaskenv")).get('OLLAMA_URL')
+ollama_embed_model = dotenv_values(find_dotenv(".quartenv")).get('OLLAMA_EMBED_MODEL')
+ollama_url = dotenv_values(find_dotenv(".quartenv")).get('OLLAMA_URL')
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.ERROR)
 
-def get_documents(vdb, to_be_converted_text, generation_kwargs_config=None):
+async def get_documents(vdb, to_be_converted_text, generation_kwargs_config=None):
     """
     This function returns a list of stored vectorized documents from the Qdrant document store
     based on embedded text (converted text).
@@ -28,24 +28,26 @@ def get_documents(vdb, to_be_converted_text, generation_kwargs_config=None):
         embedded_text = text_embedder.run(text=to_be_converted_text)
         embedding_retriever = QdrantEmbeddingRetriever(document_store=vdb)
         retrieved_documents = embedding_retriever.run(query_embedding=embedded_text['embedding'])
-
+        vdb.client.close()
         return retrieved_documents
     except Exception as e:
         raise e
 
-def get_all_documents(vdb):
+async def get_all_documents(vdb):
     """
     This function returns a list of stored vectorized documents from the document store.
 
     :return: A list of stored vectorized documents
     """
     try:
-        return vdb.filter_documents()
+        result = vdb.filter_documents()
+        vdb.client.close()
+        return result
     except Exception as e:
         logger.error(f"Failed to retrieve documents from document store: {e}")
         raise e
 
-def create_vectorized_documents(vdb, file, generation_kwargs_config=None):
+async def create_vectorized_documents(vdb, files, generation_kwargs_config=None):
     """
     This function stores vectorized documents in Qdrant document store.
     :return:
@@ -53,22 +55,26 @@ def create_vectorized_documents(vdb, file, generation_kwargs_config=None):
     if generation_kwargs_config is None:
         generation_kwargs_config = {"temperature": 0.0}
 
-    documents = convert_pdf_to_document(file["file_path"], file["authors"])
-    document_cleaner = DocumentCleaner(remove_repeated_substrings=True)
-    cleaned_documents = document_cleaner.run(documents=documents)
-    document_splitter = DocumentSplitter(split_by="word", split_length=400, respect_sentence_boundary=True)
-    document_splitter.warm_up()
-    split_documents = document_splitter.run(documents=cleaned_documents['documents'])
-    document_embedder = OllamaDocumentEmbedder(model=ollama_embed_model, url=ollama_url, generation_kwargs=generation_kwargs_config)
-    vectorized_documents = document_embedder.run(documents=split_documents['documents'])
-
+    documents = []
+    for file_object in files:
+        converted_documents = convert_pdf_to_document(file_object["file_path"], file_object["authors"])
+        document_cleaner = DocumentCleaner(remove_repeated_substrings=True)
+        cleaned_documents = document_cleaner.run(documents=converted_documents)
+        document_splitter = DocumentSplitter(split_by="word", split_length=400, respect_sentence_boundary=True)
+        document_splitter.warm_up()
+        split_documents = document_splitter.run(documents=cleaned_documents['documents'])
+        document_embedder = OllamaDocumentEmbedder(model=ollama_embed_model, url=ollama_url, generation_kwargs=generation_kwargs_config)
+        vectorized_documents = document_embedder.run(documents=split_documents['documents'])
+        documents += vectorized_documents['documents']
     try:
-        return {"count": vdb.write_documents(documents=vectorized_documents['documents'], policy=DuplicatePolicy.SKIP)}
+        count = vdb.write_documents(documents=documents, policy=DuplicatePolicy.SKIP)
+        vdb.client.close()
+        return {"count": count}
     except Exception as e:
         logger.error(f"Failed to write documents to Qdrant document store: {e}")
         raise e
 
-def delete_documents(vdb):
+async def delete_documents(vdb):
     """
     This function deletes all stored documents from the document store.
     :param vdb:
@@ -80,6 +86,7 @@ def delete_documents(vdb):
             distance=vdb.get_distance(similarity=vdb.similarity),
             embedding_dim=vdb.embedding_dim
         )
+        vdb.client.close()
     except Exception as e:
         logger.error(f"Failed to delete documents from document store: {e}")
         raise e

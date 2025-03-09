@@ -11,13 +11,13 @@ from haystack_integrations.document_stores.qdrant import QdrantDocumentStore
 
 from src.models.Record import Record
 
-ollama_embed_model = dotenv_values(find_dotenv(".flaskenv")).get('OLLAMA_EMBED_MODEL')
-ollama_url = dotenv_values(find_dotenv(".flaskenv")).get('OLLAMA_URL')
+ollama_embed_model = dotenv_values(find_dotenv(".quartenv")).get('OLLAMA_EMBED_MODEL')
+ollama_url = dotenv_values(find_dotenv(".quartenv")).get('OLLAMA_URL')
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.ERROR)
 
-def create_records(vdb: QdrantDocumentStore, file, generation_kwargs_config=None):
+async def create_records(vdb: QdrantDocumentStore, file, generation_kwargs_config=None):
     """
     This function stores records as vectorized documents in Qdrant document store.
     :return:
@@ -72,11 +72,13 @@ def create_records(vdb: QdrantDocumentStore, file, generation_kwargs_config=None
     vectorized_documents = document_embedder.run(documents=documents)
 
     try:
-        return {"count": vdb.write_documents(documents=vectorized_documents['documents'], policy=DuplicatePolicy.SKIP)}
+        count = vdb.write_documents(documents=vectorized_documents['documents'], policy=DuplicatePolicy.SKIP)
+        vdb.client.close()
+        return {"count": count}
     except Exception as e:
         logger.error(f"Failed to write records as documents to Qdrant document store: {e}")
 
-def get_records(vdb: QdrantDocumentStore, to_be_converted_text, generation_kwargs_config=None):
+async def get_records(vdb: QdrantDocumentStore, to_be_converted_text, generation_kwargs_config=None):
     """
     This function returns a list of stored records as vectorized documents from the Qdrant document store
     based on embedded text (converted text).
@@ -91,25 +93,28 @@ def get_records(vdb: QdrantDocumentStore, to_be_converted_text, generation_kwarg
         embedded_text = text_embedder.run(text=to_be_converted_text)
         embedding_retriever = QdrantEmbeddingRetriever (document_store=vdb)
         retrieved_documents = embedding_retriever.run(query_embedding=embedded_text['embedding'])
+        vdb.client.close()
     except Exception as e:
         logger.error(f"Failed to retrieve records from document store: {e}")
         raise e
 
     return retrieved_documents
 
-def get_all_records(vdb: QdrantDocumentStore):
+async def get_all_records(vdb: QdrantDocumentStore):
     """
     This function returns a list of stored records as vectorized documents from the document store.
 
     :return: A list of stored records as vectorized documents
     """
     try:
-        return vdb.filter_documents()
+        result = vdb.filter_documents()
+        vdb.client.close()
+        return result
     except Exception as e:
         logger.error(f"Failed to retrieve records from document store: {e}")
         raise e
 
-def delete_records(vdb: QdrantDocumentStore):
+async def delete_records(vdb: QdrantDocumentStore):
     """
     This function deletes all stored documents from the document store.
     :param vdb:
@@ -121,6 +126,7 @@ def delete_records(vdb: QdrantDocumentStore):
             distance=vdb.get_distance(similarity=vdb.similarity),
             embedding_dim=vdb.embedding_dim
         )
+        vdb.client.close()
     except Exception as e:
         logger.error(f"Failed to delete documents from document store: {e}")
         raise e

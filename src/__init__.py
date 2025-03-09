@@ -4,7 +4,8 @@ import os
 import sys
 import time
 
-from flask import Flask
+from quart import Quart
+
 from src.routes.routes import api
 from dotenv import load_dotenv
 from watchdog.observers import Observer
@@ -17,7 +18,7 @@ def create_app(test_config=None):
     # Load environment variables from .env and .flaskenv files
     load_dotenv()
 
-    app = Flask(__name__, instance_relative_config=True)
+    app = Quart(__name__, instance_relative_config=True)
 
     if test_config is None:
         # load the instance config, if it exists, when not testing

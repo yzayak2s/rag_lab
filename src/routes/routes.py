@@ -1,7 +1,4 @@
-from functools import reduce
-from operator import add
-
-from flask import Blueprint, request, jsonify
+from quart import Blueprint, request, jsonify
 
 from src.services.document_service import get_documents, create_vectorized_documents, delete_documents, get_all_documents
 from src.services.chat_service import chat_documents
@@ -14,113 +11,111 @@ api = Blueprint("api", __name__)
 
 # Initialize ollama generator and vector database
 ollama_generator = get_ollama_generator()
-document_store = get_document_store()
+# document_store = get_document_store()
 
 @api.route('/getRecords', methods=['POST'])
-def get_vectorized_records():
-    to_be_converted_text = request.json.get("to_be_converted_text")
-    if not to_be_converted_text:
-        return jsonify({"error": "No text information provided"}), 400
-    try:
-        retrieved_documents = get_records(
-            vdb=document_store,
-            to_be_converted_text=to_be_converted_text
-        )
-        return {"vec_docs": retrieved_documents}
-    except Exception as e:
-        return {"error": f"Something went wrong with retrieving documents: {e}"}, 500
+async def get_vectorized_records():
+    document_store = get_document_store()
+    data = await request.get_json()
+    if data:
+        try:
+            retrieved_documents = await get_records(
+                vdb=document_store,
+                to_be_converted_text=data['to_be_converted_text']
+            )
+            return {"vec_docs": retrieved_documents}
+        except Exception as e:
+            return {"error": f"Something went wrong with retrieving documents: {e}"}, 500
+    return jsonify({"error": "No text information provided"}), 400
 
 @api.route('/record', methods=['GET'])
-def retrieve_records():
+async def retrieve_records():
+    document_store = get_document_store()
     try:
-        return jsonify(get_all_records(document_store))
+        return jsonify(await get_all_records(document_store))
     except Exception  as e:
         return {"error": f"Something went wrong with retrieving all records: {e}"}, 400
 
 @api.route('/record', methods=['POST'])
-def store_records():
-    file = request.json.get("file")
-    if not file:
-        return jsonify({"error": "No file information provided"}), 400
-
-    return create_records(document_store, file)
+async def store_records():
+    document_store = get_document_store()
+    data = await request.get_json()
+    if data:
+        return await create_records(document_store, data["file"])
+    return jsonify({"error": "No file information provided"}), 400
 
 @api.route('/record', methods=['DELETE'])
-def remove_records():
-    documents = request.json.get("documents")
-    if not documents and documents != []:
+async def remove_records():
+    document_store = get_document_store()
+    data = await request.get_json()
+    if not data and not hasattr(data, "documents") and data["documents"] != []:
         return jsonify({"error": "No documents prop provided"}), 400
 
     try:
-        return jsonify(delete_records(document_store))
+        return jsonify(await delete_records(document_store))
     except Exception as e:
         return {"error": f"Something went wrong with deleting documents: {e}"}, 500
 
 @api.route('/record/drop', methods=['DELETE'])
-def drop_record():
+async def drop_record():
+    document_store = get_document_store()
     try:
         is_deleted = document_store.client.delete_collection(collection_name=document_store.index)
+        document_store.client.close()
         return jsonify({"message": f"Successfully deleted '{document_store.index}' collection", "result": is_deleted})
     except Exception as e:
         return {"error": f"Something went wrong when trying to delete collection with name {document_store.index}: {e}"}
 
 @api.route('/document', methods=['GET'])
-def retrieve_all_documents():
+async def retrieve_all_documents():
+    document_store = get_document_store()
     try:
-        return get_all_documents(document_store)
+        return await get_all_documents(document_store)
     except Exception as e:
         return {"error": f"Something went wrong with retrieving documents: {e}"}, 500
 
 @api.route('/getDocuments', methods=['POST'])
-def get_vectorized_documents():
-    to_be_converted_text = request.json.get("to_be_converted_text")
-    if not to_be_converted_text:
-        return jsonify({"error": "No text information provided"}), 400
-    try:
-        retrieved_documents = get_documents(
-            vdb=document_store,
-            to_be_converted_text=to_be_converted_text
-        )
+async def get_vectorized_documents():
+    document_store = get_document_store()
+    data = await request.get_json()
+    if data:
+        try:
+            retrieved_documents = await get_documents(
+                vdb=document_store,
+                to_be_converted_text=data["to_be_converted_text"]
+            )
 
-        return {"vec_docs": retrieved_documents}
-    except Exception as e:
-        return {"error": f"Something went wrong with retrieving documents: {e}"}, 500
+            return {"vec_docs": retrieved_documents}
+        except Exception as e:
+            return {"error": f"Something went wrong with retrieving documents: {e}"}, 500
+    return jsonify({"error": "No text information provided"}), 400
 
 @api.route('/document', methods=['POST'])
-def store_pdf():
-    file = request.json.get("file")
-    if not file:
-        return jsonify({"error": "No file information provided"}), 400
-
-    try:
-        return create_vectorized_documents(document_store, file)
-    except Exception as e:
-        return {"error": f"Something went wrong with writing a pdf as documents in document store: {e}"}, 500
-
-@api.route('/documents', methods=['POST'])
-def store_pdfs():
-    files = request.json.get("files")
-    if not files:
-        return jsonify({"error": "No files information provided"}), 400
-    try:
-        count_array = [create_vectorized_documents(document_store, file_object['file'])['count'] for file_object in files]
-        return {"total_count": reduce(add, count_array)}
-    except Exception as e:
-        return {"error": f"Something went wrong with writing pdfs as documents in document store: {e}"}, 500
+async def store_pdf():
+    document_store = get_document_store()
+    data = await request.get_json()
+    if data:
+        try:
+            return await create_vectorized_documents(document_store, data["files"])
+        except Exception as e:
+            return {"error": f"Something went wrong with writing a pdf as documents in document store: {e}"}, 500
+    return jsonify({"error": "No file information provided"}), 400
 
 @api.route('/documents', methods=['DELETE'])
-def remove_documents():
-    documents = request.json.get("documents")
-    if not documents and documents != []:
+async def remove_documents():
+    document_store = get_document_store()
+    data = await request.get_json()
+    if not data and data != []:
         return jsonify({"error": "No documents prop provided"}), 400
 
     try:
-        return jsonify(delete_documents(document_store))
+        return jsonify(await delete_documents(document_store))
     except Exception as e:
         return {"error": f"Something went wrong with deleting documents: {e}"}, 500
 
 @api.route('/documents/drop', methods=['DELETE'])
-def drop_documents():
+async def drop_documents():
+    document_store = get_document_store()
     try:
         is_deleted = document_store.client.delete_collection(collection_name=document_store.index)
         return jsonify({"message": f"Successfully deleted '{document_store.index}' collection", "result": is_deleted})
@@ -128,14 +123,15 @@ def drop_documents():
         return {"error": f"Something went wrong when trying to delete collection with name {document_store.index}: {e}"}
 
 @api.route('/chat', methods=['POST'])
-def chat_with_documents():
-    question = request.json.get("question")
-    if not question:
-        return jsonify({"error": "No question provided"}), 400
+async def chat_with_documents():
+    document_store = get_document_store()
+    data = await request.get_json()
+    if data:
+        prompted_documents = await chat_documents(
+            vdb=document_store,
+            question=data['question'],
+            generator=ollama_generator
+        )
+        return jsonify({"prompted_documents": prompted_documents})
+    return jsonify({"error": "No question provided"}), 400
 
-    prompted_documents = chat_documents(
-        vdb=document_store,
-        question=question,
-        generator=ollama_generator
-    )
-    return jsonify({"prompted_documents": prompted_documents})
