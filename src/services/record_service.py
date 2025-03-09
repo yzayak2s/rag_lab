@@ -4,11 +4,11 @@ import os
 import pandas as pd
 from dotenv import dotenv_values, find_dotenv
 from haystack import Document
-from haystack.document_stores.types import DuplicatePolicy
-from haystack_integrations.components.embedders.ollama import OllamaDocumentEmbedder, OllamaTextEmbedder
+from haystack_integrations.components.embedders.ollama import OllamaTextEmbedder
 from haystack_integrations.components.retrievers.qdrant import QdrantEmbeddingRetriever
 from haystack_integrations.document_stores.qdrant import QdrantDocumentStore
 
+from src.pipeline import create_records_pipeline
 from src.models.Record import Record
 
 ollama_embed_model = dotenv_values(find_dotenv(".quartenv")).get('OLLAMA_EMBED_MODEL')
@@ -64,17 +64,13 @@ async def create_records(vdb: QdrantDocumentStore, file, generation_kwargs_confi
             )
         )
 
-    document_embedder = OllamaDocumentEmbedder(
-        model=ollama_embed_model,
-        url=ollama_url,
-        generation_kwargs=generation_kwargs_config
-    )
-    vectorized_documents = document_embedder.run(documents=documents)
-
     try:
-        count = vdb.write_documents(documents=vectorized_documents['documents'], policy=DuplicatePolicy.SKIP)
+        pipeline = create_records_pipeline(vdb)
+        result = pipeline.run(
+            data={"document_embedder": {"documents": documents}},
+        )
         vdb.client.close()
-        return {"count": count}
+        return result['document_writer']
     except Exception as e:
         logger.error(f"Failed to write records as documents to Qdrant document store: {e}")
 

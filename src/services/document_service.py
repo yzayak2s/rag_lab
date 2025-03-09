@@ -1,11 +1,11 @@
 import logging
 
 from dotenv import dotenv_values, find_dotenv
-from haystack.components.preprocessors import DocumentCleaner, DocumentSplitter
 from haystack.document_stores.types import DuplicatePolicy
-from haystack_integrations.components.embedders.ollama import OllamaTextEmbedder, OllamaDocumentEmbedder
+from haystack_integrations.components.embedders.ollama import OllamaTextEmbedder
 from haystack_integrations.components.retrievers.qdrant import QdrantEmbeddingRetriever
 
+from src.pipeline import create_docs_first_process_pipeline
 from src.services.pdf_service import convert_pdf_to_document
 
 ollama_embed_model = dotenv_values(find_dotenv(".quartenv")).get('OLLAMA_EMBED_MODEL')
@@ -58,14 +58,11 @@ async def create_vectorized_documents(vdb, files, generation_kwargs_config=None)
     documents = []
     for file_object in files:
         converted_documents = convert_pdf_to_document(file_object["file_path"], file_object["authors"])
-        document_cleaner = DocumentCleaner(remove_repeated_substrings=True)
-        cleaned_documents = document_cleaner.run(documents=converted_documents)
-        document_splitter = DocumentSplitter(split_by="word", split_length=400, respect_sentence_boundary=True)
-        document_splitter.warm_up()
-        split_documents = document_splitter.run(documents=cleaned_documents['documents'])
-        document_embedder = OllamaDocumentEmbedder(model=ollama_embed_model, url=ollama_url, generation_kwargs=generation_kwargs_config)
-        vectorized_documents = document_embedder.run(documents=split_documents['documents'])
-        documents += vectorized_documents['documents']
+        pipeline = create_docs_first_process_pipeline()
+        vectorized_documents = pipeline.run(
+            data={"document_cleaner": {"documents": converted_documents}},
+        )
+        documents += vectorized_documents['document_embedder']['documents']
     try:
         count = vdb.write_documents(documents=documents, policy=DuplicatePolicy.SKIP)
         vdb.client.close()

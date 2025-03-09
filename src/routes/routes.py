@@ -11,7 +11,6 @@ api = Blueprint("api", __name__)
 
 # Initialize ollama generator and vector database
 ollama_generator = get_ollama_generator()
-# document_store = get_document_store()
 
 @api.route('/getRecords', methods=['POST'])
 async def get_vectorized_records():
