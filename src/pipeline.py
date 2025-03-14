@@ -1,5 +1,6 @@
 from dotenv import dotenv_values, find_dotenv
 from haystack import Pipeline
+from haystack.components.converters import PyPDFToDocument
 from haystack.components.writers import DocumentWriter
 
 from haystack.components.preprocessors import DocumentCleaner, DocumentSplitter
@@ -36,6 +37,7 @@ def create_docs_first_process_pipeline(generation_kwargs_config=None):
     :param generation_kwargs_config:
     :return:
     """
+    document_converter = PyPDFToDocument()
     document_cleaner = DocumentCleaner(remove_repeated_substrings=True)
     document_splitter = DocumentSplitter(split_by="word", split_length=400, respect_sentence_boundary=True)
     document_splitter.warm_up()
@@ -46,10 +48,12 @@ def create_docs_first_process_pipeline(generation_kwargs_config=None):
     )
 
     pipeline = Pipeline()
+    pipeline.add_component(instance=document_converter, name="document_converter")
     pipeline.add_component(instance=document_cleaner, name="document_cleaner")
     pipeline.add_component(instance=document_splitter, name="document_splitter")
     pipeline.add_component(instance=document_embedder, name="document_embedder")
 
+    pipeline.connect(sender="document_converter.documents", receiver="document_cleaner.documents")
     pipeline.connect(sender="document_cleaner.documents", receiver="document_splitter.documents")
     pipeline.connect(sender="document_splitter.documents", receiver="document_embedder.documents")
     return pipeline

@@ -3,7 +3,6 @@ import logging
 from haystack.document_stores.types import DuplicatePolicy
 
 from src.pipeline import create_docs_first_process_pipeline, create_docs_second_process_pipeline
-from src.services.pdf_service import convert_pdf_to_document
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.ERROR)
@@ -51,10 +50,11 @@ async def create_vectorized_documents(vdb, files, generation_kwargs_config=None)
 
     documents = []
     for file_object in files:
-        converted_documents = convert_pdf_to_document(file_object["file_path"], file_object["authors"])
         pipeline = create_docs_first_process_pipeline(generation_kwargs_config)
         vectorized_documents = pipeline.run(
-            data={"document_cleaner": {"documents": converted_documents}},
+            data={
+                "document_converter": {"sources": [file_object["file_path"]], "meta": [{"authors": file_object["authors"]}]},
+            },
         )
         documents += vectorized_documents['document_embedder']['documents']
     try:

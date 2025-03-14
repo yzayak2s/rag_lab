@@ -96,3 +96,6 @@ htmlcov/
 .cache/
 *.snaps
 .mypy_cache/
+
+# Pipeline images
+images
