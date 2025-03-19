@@ -1,14 +1,13 @@
 [project]
 name = "rag-lab"
 version = "1.0.0"
-description = "In diesem Projekt geht es darum, ein RAG-System zu entwickeln. Dabei soll das System die Durchführung wissenschaftlicher Literaturanalysen erheblich erleichtern."
+description = "Dies ist ein API-Backend bzw. Microservice, dass auf die Haystack Technologie basiert. Sie repräsentiert ein RAG-System das bei der Durchführung wissenschaftlicher Literaturanalysen unterstützt."
 authors = [
     {name = "youneszayakh",email = "younes.zayakh@smail.inf.h-brs.de"}
 ]
 readme = "README.md"
 requires-python = "3.10.7"
 dependencies = [
-    "haystack-ai (==2.10.0)",
     "numpy (==1.26.4)",
     "pypdf (>=5.3.0,<6.0.0)",
     "ollama-haystack (==2.3.0)",
@@ -21,7 +20,11 @@ dependencies = [
     "nltk (>=3.9.1,<4.0.0) ; python_full_version == \"3.10.7\"",
     "pymed (>=0.8.9,<0.9.0) ; python_full_version == \"3.10.7\"",
     "qdrant-haystack (>=8.0.0,<9.0.0) ; python_full_version == \"3.10.7\"",
-    "quart (>=0.20.0,<0.21.0)"
+    "quart (>=0.20.0,<0.21.0)",
+    "haystack-ai (>=2.11.2,<3.0.0)",
+    "elasticsearch-haystack (>=3.0.0,<4.0.0)",
+    "pandas (>=2.2.3,<3.0.0)",
+    "openpyxl (>=3.1.5,<4.0.0)"
 ]
 
 
