@@ -40,7 +40,7 @@ async def get_all_documents(vdb):
         logger.error(f"Failed to retrieve documents from document store: {e}")
         raise e
 
-async def create_vectorized_documents(vdb, files, generation_kwargs_config=None):
+async def create_vectorized_documents(vdb, files, split_args, generation_kwargs_config=None):
     """
     This function stores vectorized documents in Qdrant document store.
     :return:
@@ -50,7 +50,7 @@ async def create_vectorized_documents(vdb, files, generation_kwargs_config=None)
 
     documents = []
     for file_object in files:
-        pipeline = create_docs_first_process_pipeline(generation_kwargs_config)
+        pipeline = create_docs_first_process_pipeline(split_args, generation_kwargs_config)
         vectorized_documents = pipeline.run(
             data={
                 "document_converter": {"sources": [file_object["file_path"]], "meta": [{"authors": file_object["authors"]}]},

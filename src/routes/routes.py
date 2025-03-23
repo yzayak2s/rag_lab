@@ -93,9 +93,10 @@ async def get_vectorized_documents():
 async def store_pdf():
     document_store = get_document_store()
     data = await request.get_json()
+    query_params = request.args.to_dict()
     if data:
         try:
-            return await create_vectorized_documents(document_store, data["files"])
+            return await create_vectorized_documents(document_store, data["files"], query_params)
         except Exception as e:
             return {"error": f"Something went wrong with writing a pdf as documents in document store: {e}"}, 500
     return jsonify({"error": "No file information provided"}), 400

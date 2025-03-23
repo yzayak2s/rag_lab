@@ -30,16 +30,23 @@ def create_records_pipeline(vdb, generation_kwargs_config=None):
     pipeline.connect(sender="document_embedder.documents", receiver="document_writer.documents")
     return pipeline
 
-def create_docs_first_process_pipeline(generation_kwargs_config=None):
+def create_docs_first_process_pipeline(split_args, generation_kwargs_config=None):
     """
     Creates a haystack first process pipeline for documents and returns it.
 
+    :param split_args:
     :param generation_kwargs_config:
     :return:
     """
     document_converter = PyPDFToDocument()
     document_cleaner = DocumentCleaner(remove_repeated_substrings=True)
-    document_splitter = DocumentSplitter(split_by="word", split_length=400, respect_sentence_boundary=True)
+    document_splitter = DocumentSplitter(
+        split_by=split_args['split_by'],
+        split_length=int(split_args['split_length']),
+        split_overlap=int(split_args['split_overlap']),
+        split_threshold=int(split_args['split_threshold']),
+        respect_sentence_boundary=True
+    )
     document_splitter.warm_up()
     document_embedder = OllamaDocumentEmbedder(
         model=ollama_embed_model,
