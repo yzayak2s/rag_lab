@@ -14,7 +14,7 @@ ollama_generator = get_ollama_generator()
 
 @api.route('/getRecords', methods=['POST'])
 async def get_vectorized_records():
-    document_store = get_document_store()
+    document_store = get_document_store(collection_name='record')
     data = await request.get_json()
     if data:
         try:
@@ -29,7 +29,7 @@ async def get_vectorized_records():
 
 @api.route('/record', methods=['GET'])
 async def retrieve_records():
-    document_store = get_document_store()
+    document_store = get_document_store(collection_name='record')
     try:
         return jsonify(await get_all_records(document_store))
     except Exception  as e:
@@ -37,7 +37,7 @@ async def retrieve_records():
 
 @api.route('/record', methods=['POST'])
 async def store_records():
-    document_store = get_document_store()
+    document_store = get_document_store(collection_name='record')
     data = await request.get_json()
     if data:
         return await create_records(document_store, data["file"])
@@ -45,7 +45,7 @@ async def store_records():
 
 @api.route('/record', methods=['DELETE'])
 async def remove_records():
-    document_store = get_document_store()
+    document_store = get_document_store(collection_name='record')
     data = await request.get_json()
     if not data and not hasattr(data, "documents") and data["documents"] != []:
         return jsonify({"error": "No documents prop provided"}), 400
@@ -57,7 +57,7 @@ async def remove_records():
 
 @api.route('/record/drop', methods=['DELETE'])
 async def drop_record():
-    document_store = get_document_store()
+    document_store = get_document_store(collection_name='record')
     try:
         is_deleted = document_store.client.delete_collection(collection_name=document_store.index)
         document_store.client.close()
@@ -67,7 +67,7 @@ async def drop_record():
 
 @api.route('/document', methods=['GET'])
 async def retrieve_all_documents():
-    document_store = get_document_store()
+    document_store = get_document_store(collection_name='document')
     try:
         return await get_all_documents(document_store)
     except Exception as e:
@@ -75,7 +75,7 @@ async def retrieve_all_documents():
 
 @api.route('/getDocuments', methods=['POST'])
 async def get_vectorized_documents():
-    document_store = get_document_store()
+    document_store = get_document_store(collection_name='document')
     data = await request.get_json()
     if data:
         try:
@@ -91,7 +91,7 @@ async def get_vectorized_documents():
 
 @api.route('/document', methods=['POST'])
 async def store_pdf():
-    document_store = get_document_store()
+    document_store = get_document_store(collection_name='document')
     data = await request.get_json()
     query_params = request.args.to_dict()
     if data:
@@ -103,7 +103,7 @@ async def store_pdf():
 
 @api.route('/documents', methods=['DELETE'])
 async def remove_documents():
-    document_store = get_document_store()
+    document_store = get_document_store(collection_name='document')
     data = await request.get_json()
     if not data and data != []:
         return jsonify({"error": "No documents prop provided"}), 400
@@ -115,7 +115,7 @@ async def remove_documents():
 
 @api.route('/documents/drop', methods=['DELETE'])
 async def drop_documents():
-    document_store = get_document_store()
+    document_store = get_document_store(collection_name='document')
     try:
         is_deleted = document_store.client.delete_collection(collection_name=document_store.index)
         return jsonify({"message": f"Successfully deleted '{document_store.index}' collection", "result": is_deleted})
@@ -124,7 +124,8 @@ async def drop_documents():
 
 @api.route('/chat', methods=['POST'])
 async def chat_with_documents():
-    document_store = get_document_store()
+    query_params = request.args.to_dict()
+    document_store = get_document_store(collection_name=query_params['collection'])
     data = await request.get_json()
     if data:
         prompted_documents = await chat_documents(
