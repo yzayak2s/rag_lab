@@ -1,6 +1,6 @@
 [project]
 name = "rag-lab"
-version = "1.0.0"
+version = "2.0.0"
 description = "Dies ist ein API-Backend bzw. Microservice, dass auf die Haystack Technologie basiert. Sie repräsentiert ein RAG-System das bei der Durchführung wissenschaftlicher Literaturanalysen unterstützt."
 authors = [
     {name = "youneszayakh",email = "younes.zayakh@smail.inf.h-brs.de"}
