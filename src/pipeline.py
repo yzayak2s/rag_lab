@@ -7,6 +7,7 @@ from haystack.components.preprocessors import DocumentCleaner, DocumentSplitter
 from haystack.document_stores.types import DuplicatePolicy
 from haystack_integrations.components.embedders.ollama import OllamaDocumentEmbedder, OllamaTextEmbedder
 from haystack_integrations.components.retrievers.qdrant import QdrantEmbeddingRetriever
+from haystack_integrations.components.retrievers.elasticsearch import ElasticsearchEmbeddingRetriever
 
 ollama_embed_model = dotenv_values(find_dotenv(".quartenv")).get('OLLAMA_EMBED_MODEL')
 ollama_url = dotenv_values(find_dotenv(".quartenv")).get('OLLAMA_URL')
@@ -77,7 +78,8 @@ def create_docs_second_process_pipeline(vdb, generation_kwargs_config=None):
         model=ollama_embed_model, url=ollama_url,
         generation_kwargs=generation_kwargs_config
     )
-    embedding_retriever = QdrantEmbeddingRetriever(document_store=vdb)
+    # embedding_retriever = QdrantEmbeddingRetriever(document_store=vdb)
+    embedding_retriever = ElasticsearchEmbeddingRetriever(document_store=vdb)
 
     pipeline = Pipeline()
     pipeline.add_component(instance=text_embedder, name="text_embedder")
