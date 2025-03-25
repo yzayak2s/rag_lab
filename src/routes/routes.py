@@ -9,7 +9,7 @@ from src.services.record_service import create_records, get_records, delete_reco
 # Define the blueprint
 api = Blueprint("api", __name__)
 
-# Initialize ollama generator and vector database
+# Initialize ollama generator
 ollama_generator = get_ollama_generator()
 
 @api.route('/getRecords', methods=['POST'])
