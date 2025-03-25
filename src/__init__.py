@@ -11,11 +11,11 @@ from dotenv import load_dotenv
 from watchdog.observers import Observer
 from watchdog.events import LoggingEventHandler
 
-# Load environment variables from .env and .flaskenv files
+# Load environment variables from .env and .quartenv files
 load_dotenv()
 
 def create_app(test_config=None):
-    # Load environment variables from .env and .flaskenv files
+    # Load environment variables from .env and .quartenv files
     load_dotenv()
 
     app = Quart(__name__, instance_relative_config=True)
