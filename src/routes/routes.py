@@ -1,7 +1,7 @@
 from quart import Blueprint, request, jsonify
 
 from src.services.document_service import get_documents, create_vectorized_documents, delete_documents, get_all_documents
-from src.services.chat_service import chat_documents
+from src.services.chat_service import chat_documents, chat_documents_with_reference
 from src.document_store import get_document_store
 from src.generator import get_ollama_generator
 from src.services.record_service import create_records, get_records, delete_records, get_all_records
@@ -128,11 +128,24 @@ async def chat_with_documents():
     document_store = get_document_store(collection_name=query_params['collection'])
     data = await request.get_json()
     if data:
-        prompted_documents = await chat_documents(
+        result = await chat_documents(
             vdb=document_store,
             question=data['question'],
             generator=ollama_generator
         )
-        return jsonify({"prompted_documents": prompted_documents})
+        return jsonify(result)
     return jsonify({"error": "No question provided"}), 400
 
+@api.route('/chatWithReference', methods=['POST'])
+async def chat_documents_with_ref():
+    query_params = request.args.to_dict()
+    document_store = get_document_store(collection_name=query_params['collection'])
+    data = await request.get_json()
+    if data:
+        results = await chat_documents_with_reference(
+            vdb=document_store,
+            question=data['question'],
+            generator=ollama_generator
+        )
+        return results
+    return jsonify({"error": "No question provided"}), 400
