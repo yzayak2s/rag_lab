@@ -1,4 +1,4 @@
-from quart import Blueprint, request, jsonify
+from quart import Blueprint, request, jsonify, session
 
 from src.services.document_service import get_documents, create_vectorized_documents, delete_documents, get_all_documents
 from src.services.chat_service import chat_documents, chat_documents_with_reference
@@ -127,13 +127,32 @@ async def chat_with_documents():
     query_params = request.args.to_dict()
     document_store = get_document_store(collection_name=query_params['collection'])
     data = await request.get_json()
+    generation_kwargs = None
+    if query_params.get('temperature'):
+        generation_kwargs = {'temperature': float(query_params['temperature'])}
+
+    # Load the previous chat history or create a new one
+    chat_history = session.get("chat_history", [])
+
+    # Create the context for the LLM
+    context = "\n".join(chat_history)
+
+    # Combine context with new question
+    chat_with_question = f"Chatverlauf:\n{context}\nBenutzer: {data['question']}\nLLM:"
     if data:
         result = await chat_documents(
             vdb=document_store,
             question=data['question'],
             generator=ollama_generator,
-            generation_kwargs={'temperature': float(query_params['temperature'])}
+            generation_kwargs=generation_kwargs,
+            chat_with_question=chat_with_question
         )
+
+        # Save the new question and reply in the history
+        chat_history.append(f"User: {data['question']}")
+        chat_history.append(f"LLM: {result['replies']}")
+        session["chat_history"] = chat_history
+
         return jsonify(result)
     return jsonify({"error": "No question provided"}), 400
 
