@@ -39,7 +39,7 @@ def create_docs_first_process_pipeline(split_args, generation_kwargs_config=None
     :param generation_kwargs_config:
     :return:
     """
-    document_converter = PyPDFToDocument()
+    document_converter = PyPDFToDocument(store_full_path=True)
     document_cleaner = DocumentCleaner(remove_repeated_substrings=True)
     document_splitter = DocumentSplitter(
         split_by=split_args['split_by'],

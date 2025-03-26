@@ -1,4 +1,5 @@
 import logging
+import os
 
 from haystack.document_stores.types import DuplicatePolicy
 
@@ -53,7 +54,15 @@ async def create_vectorized_documents(vdb, files, split_args, generation_kwargs_
         pipeline = create_docs_first_process_pipeline(split_args, generation_kwargs_config)
         vectorized_documents = pipeline.run(
             data={
-                "document_converter": {"sources": [file_object["file_path"]], "meta": [{"authors": file_object["authors"]}]},
+                "document_converter": {
+                    "sources": [os.path.join(os.path.dirname(os.path.abspath(__package__)), file_object['file_path'])],
+                    "meta": [{
+                        "authors": file_object["authors"],
+                        "article_title": file_object.get("article_title", ""),
+                        "source_title": file_object.get("source_title", ""),
+                        "year": file_object.get("year", ""),
+                    }]
+                },
             },
         )
         documents += vectorized_documents['document_embedder']['documents']
