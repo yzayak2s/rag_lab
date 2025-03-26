@@ -131,7 +131,8 @@ async def chat_with_documents():
         result = await chat_documents(
             vdb=document_store,
             question=data['question'],
-            generator=ollama_generator
+            generator=ollama_generator,
+            generation_kwargs={'temperature': float(query_params['temperature'])}
         )
         return jsonify(result)
     return jsonify({"error": "No question provided"}), 400
